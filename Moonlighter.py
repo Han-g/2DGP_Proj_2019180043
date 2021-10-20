@@ -14,9 +14,6 @@ class Background:
         self.image.draw(400, 250)
 
 
-# char_move = load_image('charmove2.png')
-# char_attack = load_image('attack.png')
-
 class Character:
     def __init__(self):
         self.x, self.y = 400, 250
@@ -24,10 +21,44 @@ class Character:
         self.Mimage = load_image('charmove2.png')
         self.Aimage = load_image('attack.png')
 
+        self.pressed = {
+            'w': False,
+            'a': False,
+            's': False,
+            'd': False,
+            'j': False,
+            ' ': False
+        }
+
     def move(self):
         global run, frame, w, a, s, d
 
         self.Mimage.clip_draw(frame * 24, 0, 24, 42, self.x, self.y)
+
+        events = get_events()
+        for event in events:
+            if event.type == SDL_KEYDOWN and event.key == SDLK_w:
+                self.pressed['w'] = True
+            if event.type == SDL_KEYDOWN and event.key == SDLK_s:
+                self.pressed['s'] = True
+            if event.type == SDL_KEYDOWN and event.key == SDLK_a:
+                self.pressed['a'] = True
+            if event.type == SDL_KEYDOWN and event.key == SDLK_d:
+                self.pressed['d'] = True
+            if event.type == SDL_KEYDOWN and event.key == SDLK_j:
+                self.pressed['j'] = True
+            if event.type == SDL_KEYDOWN and event.key == SDLK_SPACE:
+                self.pressed[' '] = True
+            if event.type == SDL_KEYUP:
+                self.pressed.update({
+                    'w': False,
+                    'a': False,
+                    's': False,
+                    'd': False,
+                    'j': False,
+                    ' ': False
+                })
+
 
         # 맵 벗어나지 않게 하기
         if self.x > 776:
@@ -40,50 +71,40 @@ class Character:
             self.y = 21
 
         # 키 상호작용
-        events1 = get_events()
-        for event in events1:
-            if event.type == SDL_KEYDOWN:
-                if event.key == SDLK_w:
-                    w = (w + 1) % 4
-                    self.y = self.y + 5
-                    frame = 1 + 4 * w
-                elif event.key == SDLK_s:
-                    s = (s + 1) % 4
-                    self.y = self.y - 5
-                    frame = 0 + 4 * s
-                elif event.key == SDLK_a:
-                    a = (a + 1) % 4
-                    self.x = self.x - 5
-                    frame = 3 + 4 * a
-                elif event.key == SDLK_d:
-                    d = (d + 1) % 4
-                    self.x = self.x + 5
-                    frame = 2 + 4 * d
-            elif event.type == SDL_KEYUP:
-                if event.key == SDLK_w:
-                    self.y = self.y + 5
-                elif event.key == SDLK_s:
-                    self.y = self.y - 5
-                elif event.key == SDLK_a:
-                    self.x = self.x - 5
-                elif event.key == SDLK_d:
-                    self.x = self.x + 5
-            elif event.type == SDL_QUIT:
-                run = False
-            elif event.type == SDL_KEYDOWN:
-                if event.key == SDLK_ESCAPE:
-                    run = False
+        if self.pressed['w']:
+            w = (w + 1) % 4
+            self.y = self.y + 5
+            frame = 1 + 4 * w
+        if self.pressed['s']:
+            s = (s + 1) % 4
+            self.y = self.y - 5
+            frame = 0 + 4 * s
+        if self.pressed['a']:
+            a = (a + 1) % 4
+            self.x = self.x - 5
+            frame = 3 + 4 * a
+        if self.pressed['d']:
+            d = (d + 1) % 4
+            self.x = self.x + 5
+            frame = 2 + 4 * d
 
     def attack(self):
-        events2 = get_events()
-        for event in events2:
-            if event.type == SDL_KEYDOWN and event.key == SDLK_j:
-                print('j pressed')
-                for f in range(0, 8):
-                    clear_canvas()
-                    self.Aimage.clip_draw(f * 30, 0, 30, 42, self.x, self.y)
-                    update_canvas()
-                    delay(0.1)
+        # events = get_events()
+        # for event in events:
+
+        if self.pressed['j']:
+            print('j pressed')
+            for f in range(0, 8):
+                clear_canvas()
+                background.draw()
+                self.Aimage.clip_draw(f * 31, 0, 31, 42, self.x, self.y)
+                update_canvas()
+                delay(0.1)
+    #
+    # def roll(self):
+    #     if self.pressed[' ']:
+
+
 
 
 open_canvas(back_x, back_y)
@@ -92,12 +113,12 @@ charcater = Character()
 w, a, s, d = 0, 0, 0, 0
 
 while run:
+    print(charcater.pressed)
     clear_canvas()
     background.draw()
     charcater.move()
-    delay(0.001)
     charcater.attack()
     update_canvas()
-    delay(0.01)
+    delay(0.05)
 
 close_canvas()
