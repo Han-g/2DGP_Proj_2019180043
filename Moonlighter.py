@@ -20,6 +20,10 @@ class Character:
         self.frame = 0
         self.Mimage = load_image('charmove2.png')
         self.Aimage = load_image('attack.png')
+        self.Rimage_R = load_image('Roll_Right.png')
+        self.Rimage_L = load_image('Roll_Left.png')
+        self.Rimage_U = load_image('Roll_Up.png')
+        self.Rimage_D = load_image('Roll_Down.png')
 
         self.pressed = {
             'w': False,
@@ -27,11 +31,11 @@ class Character:
             's': False,
             'd': False,
             'j': False,
-            ' ': False
+            'SPACE': False
         }
 
     def move(self):
-        global run, frame, w, a, s, d
+        global run, frame, w, s, a, d
 
         self.Mimage.clip_draw(frame * 24, 0, 24, 42, self.x, self.y)
 
@@ -48,7 +52,9 @@ class Character:
             if event.type == SDL_KEYDOWN and event.key == SDLK_j:
                 self.pressed['j'] = True
             if event.type == SDL_KEYDOWN and event.key == SDLK_SPACE:
-                self.pressed[' '] = True
+                self.pressed['SPACE'] = True
+            if event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
+                run = False
             if event.type == SDL_KEYUP:
                 self.pressed.update({
                     'w': False,
@@ -56,7 +62,7 @@ class Character:
                     's': False,
                     'd': False,
                     'j': False,
-                    ' ': False
+                    'SPACE': False
                 })
 
 
@@ -73,18 +79,22 @@ class Character:
         # 키 상호작용
         if self.pressed['w']:
             w = (w + 1) % 4
+            a, s, d, = 0, 0, 0
             self.y = self.y + 5
             frame = 1 + 4 * w
         if self.pressed['s']:
             s = (s + 1) % 4
+            w, a, d = 0, 0, 0
             self.y = self.y - 5
             frame = 0 + 4 * s
         if self.pressed['a']:
             a = (a + 1) % 4
+            w, s, d = 0, 0, 0
             self.x = self.x - 5
             frame = 3 + 4 * a
         if self.pressed['d']:
             d = (d + 1) % 4
+            w, a, s = 0, 0, 0
             self.x = self.x + 5
             frame = 2 + 4 * d
 
@@ -93,19 +103,33 @@ class Character:
         # for event in events:
 
         if self.pressed['j']:
-            print('j pressed')
+            #print('j pressed')
             for f in range(0, 8):
                 clear_canvas()
                 background.draw()
                 self.Aimage.clip_draw(f * 31, 0, 31, 42, self.x, self.y)
                 update_canvas()
                 delay(0.1)
-    #
-    # def roll(self):
-    #     if self.pressed[' ']:
 
-
-
+    def roll(self):
+        if self.pressed['SPACE']:
+            for f in range(0, 8):
+                clear_canvas()
+                background.draw()
+                if self.pressed['w']:
+                    self.Rimage_U.clip_draw(f * 28, 0, 28, 42, self.x, self.y)
+                    self.y = self.y + 5
+                if self.pressed['a']:
+                    self.Rimage_L.clip_draw(f * 35, 0, 35, 42, self.x, self.y)
+                    self.x = self.x - 5
+                if self.pressed['s']:
+                    self.Rimage_D.clip_draw(f * 28, 0, 28, 42, self.x, self.y)
+                    self.y = self.y - 5
+                if self.pressed['d']:
+                    self.Rimage_R.clip_draw(f * 35, 0, 35, 42, self.x, self.y)
+                    self.x = self.x + 5
+                update_canvas()
+                delay(0.1)
 
 open_canvas(back_x, back_y)
 background = Background()
@@ -113,11 +137,12 @@ charcater = Character()
 w, a, s, d = 0, 0, 0, 0
 
 while run:
-    print(charcater.pressed)
+    print(w, a, s, d, charcater.pressed)
     clear_canvas()
     background.draw()
     charcater.move()
     charcater.attack()
+    charcater.roll()
     update_canvas()
     delay(0.05)
 
