@@ -9,9 +9,11 @@ frame = 0
 class Background:
     def __init__(self):
         self.image = load_image('background.png')
+        self.Himage = load_image('hole.png')
 
     def draw(self):
         self.image.draw(400, 250)
+        self.Himage.draw(704, 60)
 
 
 class Character:
@@ -25,12 +27,14 @@ class Character:
         self.Rimage_U = load_image('Roll_Up.png')
         self.Rimage_D = load_image('Roll_Down.png')
 
+
         self.pressed = {
             'w': False,
             'a': False,
             's': False,
             'd': False,
             'j': False,
+            'h': False,
             'SPACE': False
         }
 
@@ -55,15 +59,18 @@ class Character:
                 self.pressed['SPACE'] = True
             if event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
                 run = False
-            if event.type == SDL_KEYUP:
-                self.pressed.update({
-                    'w': False,
-                    'a': False,
-                    's': False,
-                    'd': False,
-                    'j': False,
-                    'SPACE': False
-                })
+            if event.type == SDL_KEYUP and event.key == SDLK_w:
+                self.pressed['w'] = False
+            if event.type == SDL_KEYUP and event.key == SDLK_s:
+                self.pressed['s'] = False
+            if event.type == SDL_KEYUP and event.key == SDLK_a:
+                self.pressed['a'] = False
+            if event.type == SDL_KEYUP and event.key == SDLK_d:
+                self.pressed['d'] = False
+            if event.type == SDL_KEYUP and event.key == SDLK_j:
+                self.pressed['j'] = False
+            if event.type == SDL_KEYUP and event.key == SDLK_SPACE:
+                self.pressed['SPACE'] = False
 
 
         # 맵 벗어나지 않게 하기
