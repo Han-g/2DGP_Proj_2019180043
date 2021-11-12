@@ -1,6 +1,12 @@
 from pico2d import *
 import Game_State
+import Framework
 
+open_canvas(800, 500)
+Framework.play(Game_State)
+close_canvas()
+
+'''
 back_x, back_y = 800, 500
 character_x, character_y = 400, 250
 run = True
@@ -144,3 +150,4 @@ while run:
     delay(0.05)
 
 close_canvas()
+'''

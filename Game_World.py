@@ -33,5 +33,3 @@ def all_objects():
     for i in range(len(objects)):
         for o in objects[i]:
             yield o
-
-
