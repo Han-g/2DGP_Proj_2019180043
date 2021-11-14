@@ -14,7 +14,7 @@ def enter():
 
     Game_World.add_object(background, 0)
     Game_World.add_object(character, 1)
-    # Game_World.add_object(monster, 2)
+    Game_World.add_object(monster, 2)
 
 def update():
     for game_object in Game_World.all_objects():
