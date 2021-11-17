@@ -24,7 +24,7 @@ class Background:
 
     def update(self):
         self.frame = (self.frame + 1) % 7
-        delay(0.2)
+        # delay(0.2)
 
     def handle_event(self, event):
         pass

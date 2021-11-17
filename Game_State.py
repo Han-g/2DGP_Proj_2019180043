@@ -19,6 +19,7 @@ def enter():
 def update():
     for game_object in Game_World.all_objects():
         game_object.update()
+    delay(0.01)
 
 def exit():
     Game_World.clear()
