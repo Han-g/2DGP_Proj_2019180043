@@ -33,27 +33,6 @@ key_event_table = {
 }
 
 
-# class Stop:
-#     def enter(character, event):
-#         if event == RIGHT_ON:
-#             character.sight = 2
-#         elif event == LEFT_ON:
-#             character.sight = 3
-#         elif event == UP_ON:
-#             character.sight = 1
-#         elif event == UNDER_ON:
-#             character.sight = 0
-#
-#     def exit(character, event):
-#         pass
-#
-#     def do(character):
-#         character.frame = character.sight
-#
-#     def draw(character):
-#         character.Mimage.clip_draw(character.sight * 24, 0, 24, 42, character.x, character.y)
-
-
 class Move:
     def enter(character, event):
         if event == RIGHT_OFF or event == LEFT_OFF or event == UP_OFF or event == UNDER_OFF:
@@ -89,7 +68,7 @@ class Move:
             character.x += character.velocity * Framework.frame_time
         # character.x = clamp(25, character.x, 775)
         # character.y = clamp(20, character.y, 470)
-        print(character.velocity * Framework.frame_time)
+        # print(character.velocity * Framework.frame_time)
 
         # 맵 벗어나지 않게 하기
         if character.x > 776:
@@ -122,7 +101,7 @@ class Attack:
 
     def draw(character):
         character.Aimage.clip_draw(int(character.frame) * 31, 0, 31, 42, character.x, character.y)
-# 1번의 입력으로 8번만 반복시키기
+
 
 class Dffense:
     def enter(character, event):
@@ -187,9 +166,6 @@ class Roll:
 
 
 state_table = {
-    # Stop: {RIGHT_ON: Move, LEFT_ON: Move, UP_ON: Move, UNDER_ON: Move, \
-    #        RIGHT_OFF: Stop, LEFT_OFF: Stop, UP_OFF: Stop, UNDER_OFF: Stop, \
-    #        ATT_ON: Attack, ROLL_ON: Roll, DFF_ON: Dffense, ATT_OFF: Stop, ROLL_OFF: Stop, DFF_OFF: Stop},
     Move: {RIGHT_ON: Move, LEFT_ON: Move, UP_ON: Move, UNDER_ON: Move, \
            RIGHT_OFF: Move, LEFT_OFF: Move, UP_OFF: Move, UNDER_OFF: Move, \
            ATT_ON: Attack, ROLL_ON: Roll, DFF_ON: Dffense, ATT_OFF: Move, ROLL_OFF: Move, DFF_OFF: Move},
@@ -206,6 +182,7 @@ state_table = {
 
 
 class Character:
+    state_temp = 8
     def __init__(self):
         self.x, self.y = 400, 250
         self.frame = 0
@@ -228,7 +205,14 @@ class Character:
 
     def update(self):
         self.current.do(self)
-        if len(self.event_que) > 0:
+        if self.current == Attack and Character.state_temp > 0:
+            Character.state_temp -= 1
+
+        elif self.current == Roll and Character.state_temp > 0:
+            Character.state_temp -= 1
+
+        elif len(self.event_que) > 0:
+            Character.state_temp = 7
             event = self.event_que.pop()
             self.current.exit(self, event)
             self.current = state_table[self.current][event]
@@ -241,3 +225,12 @@ class Character:
         if (event.type, event.key) in key_event_table:
             key_event = key_event_table[(event.type, event.key)]
             self.add_event(key_event)
+
+    def get_bb(self):
+        return self.x -12, self.y -12, self.x + 12, self.y + 12
+
+    def get_x(self):
+        return self.x
+
+    def get_y(self):
+        return self.y

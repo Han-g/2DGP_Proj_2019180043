@@ -1,5 +1,4 @@
 from pico2d import *
-from character import Character
 import random
 
 PIXEL_PER_METER = (10.0 / 0.3)
@@ -25,25 +24,22 @@ class Stop:
 
 class Move:
     def enter(monster):
-        # if (monster.x - character.x) / abs(monster.x - character.x) > 0:
-        #     pass
-        # else:
-        #     pass
-        # if (monster.y - character.y) / abs(monster.y - character.y) > 0:
-        #     pass
-        # else:
-        #     pass
+        # monster.abs_x = (monster.x - character.x) / abs(monster.x - character.x)
+        # monster.abs_y = (monster.y - character.y) / abs(monster.y - character.y)
         pass
 
     def exit(monster):
         pass
 
     def do(monster):
-        # if monster.x != character.x:
-        #     monster.x += (monster.x - character.x) / abs(monster.x - character.x)
-        # if monster.y != character.y:
-        #     monster.y += (monster.y - character.y) / abs(monster.y - character.y)
-        pass
+        if monster.x > 776:
+            monster.x = 776
+        elif monster.x < 24:
+            monster.x = 24
+        if monster.y > 468:
+            monster.y = 468
+        elif monster.y < 21:
+            monster.y = 21
 
     def draw(monster):
         monster.M1image.clip_draw(monster.frame * 36, 0, 36, 60, monster.x, monster.y)
@@ -66,7 +62,7 @@ class Attack:
 class Monster:
     def __init__(self):
         self.M1image = load_image('M1_Move.png')
-        self.x, self.y = random.randint(100, 700), random.randint(100, 300)
+        self.x, self.y = random.randint(2, 6) * 100, random.randint(1, 2) * 100
         self.current = Move
         self.frame = 0
         self.sight = 0
@@ -75,6 +71,7 @@ class Monster:
         pass
 
     def update(self):
+        self.current.enter(self)
         self.current.do(self)
 
     def draw(self):
@@ -82,3 +79,17 @@ class Monster:
 
     def handle_event(self, event):
         pass
+
+    def get_bb(self):
+        return self.x - 20, self.y - 20, self. x + 20, self.y + 20
+
+    def get_x(self):
+        return self.x
+
+    def get_y(self):
+        return self.y
+
+    def nearby(self, change):
+        change_x, change_y = change
+        self.x += change_x * 1
+        self.y += change_y * 1
