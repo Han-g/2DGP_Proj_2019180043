@@ -1,5 +1,6 @@
 from pico2d import *
 import random
+import Framework
 
 PIXEL_PER_METER = (10.0 / 0.3)
 MOVE_SPEED_KMPH = 10
@@ -32,6 +33,8 @@ class Move:
         pass
 
     def do(monster):
+        monster.x += monster.velocity_x * Framework.frame_time
+        monster.y += monster.velocity_y * Framework.frame_time
         if monster.x > 776:
             monster.x = 776
         elif monster.x < 24:
@@ -65,6 +68,8 @@ class Monster:
         self.x, self.y = random.randint(2, 6) * 100, random.randint(1, 2) * 100
         self.current = Move
         self.frame = 0
+        self.velocity_x = 0
+        self.velocity_y = 0
         self.sight = 0
 
     def add_evnet(self, event):
@@ -91,5 +96,5 @@ class Monster:
 
     def nearby(self, change):
         change_x, change_y = change
-        self.x += change_x * 1
-        self.y += change_y * 1
+        self.velocity_x = change_x * 30
+        self.velocity_y = change_y * 30

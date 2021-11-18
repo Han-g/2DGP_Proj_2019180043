@@ -6,27 +6,32 @@ import Framework
 
 from character import Character
 from background import Background
+from background import Hole
 from monster import Monster
 
 def enter():
     global character, background, monster
     character = Character()
     background = Background()
+    hole = Hole()
     monster = [Monster() for i in range(random.randint(3, 10))]
 
     Game_World.add_object(background, 0)
     Game_World.add_object(character, 1)
+    Game_World.add_object(hole, 2)
     Game_World.add_objects(monster, 2)
 
 def update():
     for game_object in Game_World.all_objects():
         game_object.update()
-        # for i in monster:
-        #     game_object.nearby(nearby(character, monster[i]))
+        for i in monster:
+            i.nearby(near_by(character, i))
     for monsters in monster:
         monsters.nearby(near_by(character, monsters))
-        if collide(character, monsters):
-            pass
+    if collide(Hole, monsters):
+        pass
+    if collide(Hole, character):
+        character.init_coor()
 
 def exit():
     Game_World.clear()
@@ -79,14 +84,14 @@ def near_by(a, b):
     if x1 - x2 == 0:
         move_val_x = 1
     elif x1 - x2 < 0:
-        move_val_x = 1
-    elif x1 - x2 > 0:
         move_val_x = -1
+    elif x1 - x2 > 0:
+        move_val_x = 1
     if y1 - y2 == 0:
         move_val_y = 1
     elif y1 - y2 < 0:
-        move_val_y = 1
-    elif y1 - y2 > 0:
         move_val_y = -1
+    elif y1 - y2 > 0:
+        move_val_y = 1
     return move_val_x, move_val_y
 

@@ -184,7 +184,7 @@ state_table = {
 class Character:
     state_temp = 8
     def __init__(self):
-        self.x, self.y = 400, 250
+        self.x, self.y = 600, 250
         self.frame = 0
         self.sight = 0
         self.dir = 1
@@ -226,8 +226,11 @@ class Character:
             key_event = key_event_table[(event.type, event.key)]
             self.add_event(key_event)
 
+    def init_coor(self):
+        self.x, self.y = 600, 250
+
     def get_bb(self):
-        return self.x -12, self.y -12, self.x + 12, self.y + 12
+        return self.x - 12, self.y - 12, self.x + 12, self.y + 12
 
     def get_x(self):
         return self.x
