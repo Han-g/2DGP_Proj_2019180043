@@ -25,9 +25,7 @@ class Stop:
 
 class Move:
     def enter(monster):
-        # monster.abs_x = (monster.x - character.x) / abs(monster.x - character.x)
-        # monster.abs_y = (monster.y - character.y) / abs(monster.y - character.y)
-        pass
+        monster.Mnumber = random.randint(3, 8)
 
     def exit(monster):
         pass
@@ -66,6 +64,7 @@ class Monster:
     def __init__(self):
         self.M1image = load_image('M1_Move.png')
         self.x, self.y = random.randint(2, 6) * 100, random.randint(1, 2) * 100
+        self.Mnumber = 0
         self.current = Move
         self.frame = 0
         self.velocity_x = 0

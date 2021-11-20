@@ -10,11 +10,11 @@ from background import Hole
 from monster import Monster
 
 def enter():
-    global character, background, monster
+    global character, background, monster, hole
     character = Character()
     background = Background()
     hole = Hole()
-    monster = [Monster() for i in range(random.randint(3, 10))]
+    monster = [Monster() for i in range(random.randint(3, 8))]
 
     Game_World.add_object(background, 0)
     Game_World.add_object(character, 1)
@@ -28,10 +28,12 @@ def update():
             i.nearby(near_by(character, i))
     for monsters in monster:
         monsters.nearby(near_by(character, monsters))
-    if collide(Hole, monsters):
-        pass
-    if collide(Hole, character):
+        if collide(background, monsters):
+            pass
+    if fallen(background, character):
+        print('falling')
         character.init_coor()
+    print(fallen(background, character))
 
 def exit():
     Game_World.clear()
@@ -58,14 +60,34 @@ def handle_event():
         else:
             character.handle_event(event)
 
+
 def collide(a, b):
-    left_a, right_a, top_a, bottom_a = a.get_bb()
-    left_b, right_b, top_b, bottom_b = b.get_bb()
+    left_a, bottom_a, right_a, top_a = a.get_bb()
+    left_b, bottom_b, right_b, top_b = b.get_bb()
 
     if left_a > right_b: return False
     if right_a < left_b: return False
     if top_a < bottom_b: return False
     if bottom_a > top_b: return False
+
+    return True
+
+def fallen(a, b):
+    left_ru, bottom_ru, right_ru, top_ru,\
+    left_lu, bottom_lu, right_lu, top_lu,\
+    left_ld, bottom_ld, right_ld, top_ld,\
+    left_rd, bottom_rd, right_rd, top_rd = a.get_bb4()
+
+    left_b, bottom_b, right_b, top_b = b.get_bb()
+
+    if left_ru > right_b or right_ru < left_b or top_ru < bottom_b or bottom_ru > top_b:
+        return False
+    elif left_lu > right_b or right_lu < left_b or top_lu < bottom_b or bottom_lu > top_b:
+        return False
+    elif left_ld > right_b or right_ld < left_b or top_ld < bottom_b or bottom_ld > top_b:
+        return False
+    elif left_rd > right_b or right_rd < left_b or top_rd < bottom_b or bottom_rd > top_b:
+        return False
 
     return True
 

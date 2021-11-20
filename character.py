@@ -189,6 +189,7 @@ class Character:
         self.sight = 0
         self.dir = 1
         self.velocity = 0
+        self.hp = 0
         self.current = Move
         self.current.enter(self, None)
         self.event_que = []
@@ -205,6 +206,7 @@ class Character:
 
     def update(self):
         self.current.do(self)
+        # print(self.x, self.y)
         if self.current == Attack and Character.state_temp > 0:
             Character.state_temp -= 1
 
@@ -220,6 +222,7 @@ class Character:
 
     def draw(self):
         self.current.draw(self)
+        # draw_rectangle(*self.get_bb())
 
     def handle_event(self, event):
         if (event.type, event.key) in key_event_table:
@@ -228,6 +231,7 @@ class Character:
 
     def init_coor(self):
         self.x, self.y = 600, 250
+        self.current.draw(self)
 
     def get_bb(self):
         return self.x - 12, self.y - 12, self.x + 12, self.y + 12
