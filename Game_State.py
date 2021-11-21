@@ -62,34 +62,47 @@ def handle_event():
 
 
 def collide(a, b):
-    left_a, bottom_a, right_a, top_a = a.get_bb()
-    left_b, bottom_b, right_b, top_b = b.get_bb()
+    return intersect(a.get_bb(), b.get_bb())
 
-    if left_a > right_b: return False
-    if right_a < left_b: return False
-    if top_a < bottom_b: return False
-    if bottom_a > top_b: return False
-
-    return True
 
 def fallen(a, b):
-    left_ru, bottom_ru, right_ru, top_ru,\
-    left_lu, bottom_lu, right_lu, top_lu,\
-    left_ld, bottom_ld, right_ld, top_ld,\
-    left_rd, bottom_rd, right_rd, top_rd = a.get_bb4()
+    boxes = a.get_bb4()
+    player_bb = b.get_bb()
+    length = 4
+    for i in range(length):
+        box = boxes[(i * length):(i * length) + length]
+        if intersect(player_bb, box):
+            return True
+    return False
 
-    left_b, bottom_b, right_b, top_b = b.get_bb()
 
-    if left_ru > right_b or right_ru < left_b or top_ru < bottom_b or bottom_ru > top_b:
-        return False
-    elif left_lu > right_b or right_lu < left_b or top_lu < bottom_b or bottom_lu > top_b:
-        return False
-    elif left_ld > right_b or right_ld < left_b or top_ld < bottom_b or bottom_ld > top_b:
-        return False
-    elif left_rd > right_b or right_rd < left_b or top_rd < bottom_b or bottom_rd > top_b:
-        return False
+def contains(value, min, max):
+    return min <= value <= max
 
-    return True
+
+def unpack_into_region(box):
+    from_X_axis = box[0]
+    from_Y_axis = box[1]
+    to_X_axis = box[2]
+    to_Y_axis = box[3]
+
+    x = min(from_X_axis, to_X_axis)
+    y = min(from_Y_axis, to_Y_axis)
+    w = max(from_X_axis, to_X_axis) - x
+    h = max(from_Y_axis, to_Y_axis) - y
+
+    return x, y, w, h
+
+
+def intersect(a, b):
+    Ax, Ay, Aw, Ah = unpack_into_region(a)
+    Bx, By, Bw, Bh = unpack_into_region(b)
+
+    intersect_X = contains(Ax, Bx, Bx + Bw) or contains(Bx, Ax, Ax + Aw)
+    intersect_Y = contains(Ay, By, By + Bh) or contains(By, Ay, Ay + Ah)
+
+    return intersect_X and intersect_Y
+
 
 def get_coordinate(a):
     x = a.get_x()

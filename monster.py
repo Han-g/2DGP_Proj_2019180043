@@ -9,20 +9,6 @@ MOVE_SPEED_MPS = (MOVE_SPEED_MPM / 60.0)
 MOVE_SPEED_PPS = (MOVE_SPEED_MPS * PIXEL_PER_METER)
 
 
-class Stop:
-    def enter(monster):
-        pass
-
-    def exit(monster):
-        pass
-
-    def do(monster):
-        pass
-
-    def draw(monster):
-        pass
-
-
 class Move:
     def enter(monster):
         monster.Mnumber = random.randint(3, 8)
@@ -77,6 +63,8 @@ class Monster:
     def update(self):
         self.current.enter(self)
         self.current.do(self)
+        if self.Mnumber == 0:
+            pass
 
     def draw(self):
         self.current.draw(self)

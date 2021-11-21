@@ -233,6 +233,12 @@ class Character:
         self.x, self.y = 600, 250
         self.current.draw(self)
 
+    def collide_gimmick(self):
+        pass
+
+    def game_over(self):
+        pass
+
     def get_bb(self):
         return self.x - 12, self.y - 12, self.x + 12, self.y + 12
 

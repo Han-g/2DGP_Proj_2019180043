@@ -30,13 +30,20 @@ class Background:
     def draw(self):
         self.image.draw(400, 250)
         self.Door_image.clip_draw(self.frame * 128, 0, 128, 128, 400, 470)
-        # draw_rectangle(*self.get_bb())
+
+        # boxes = self.get_bb4()
+        # for i in range(4):
+        #     box = boxes[(i * 4):(i * 4) + 4]
+        #     draw_rectangle(*box)
 
     def update(self):
         self.frame = (self.frame + 1) % 7
         # delay(0.2)
 
     def handle_event(self, event):
+        pass
+
+    def stage_change(self):
         pass
 
     def get_bb(self):
