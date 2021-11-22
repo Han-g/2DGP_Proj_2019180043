@@ -28,12 +28,10 @@ def update():
             i.nearby(near_by(character, i))
     for monsters in monster:
         monsters.nearby(near_by(character, monsters))
-        if collide(background, monsters):
-            pass
+        if collide(character, monsters):
+            character.collide_gimmick()
     if fallen(background, character):
-        print('falling')
         character.init_coor()
-    print(fallen(background, character))
 
 def exit():
     Game_World.clear()

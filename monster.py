@@ -83,5 +83,5 @@ class Monster:
 
     def nearby(self, change):
         change_x, change_y = change
-        self.velocity_x = change_x * 30
-        self.velocity_y = change_y * 30
+        self.velocity_x = change_x * (30 * random.randint(1, 50) / 30)
+        self.velocity_y = change_y * (30 * random.randint(1, 50) / 30)

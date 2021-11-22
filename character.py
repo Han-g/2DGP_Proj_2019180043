@@ -188,8 +188,9 @@ class Character:
         self.frame = 0
         self.sight = 0
         self.dir = 1
+        self.Time = 500
         self.velocity = 0
-        self.hp = 0
+        self.hp = 200
         self.current = Move
         self.current.enter(self, None)
         self.event_que = []
@@ -234,10 +235,20 @@ class Character:
         self.current.draw(self)
 
     def collide_gimmick(self):
-        pass
+        if self.Time == 500:
+            print('Hp Down')
+            self.hp -= 10
+            print(self.hp)
+            self.Time -= 1
+        elif self.Time == 0:
+            self.Time = 500
+        else:
+            self.Time -= 1
+
 
     def game_over(self):
-        pass
+        if self.hp < 0:
+            pass
 
     def get_bb(self):
         return self.x - 12, self.y - 12, self.x + 12, self.y + 12
