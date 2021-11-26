@@ -44,7 +44,7 @@ def update():
     if monsters.hp <= 0:
         monsters.clear()
 
-    if monsters.Mnumber == 0:
+    if monsters.count_num_monster():
         background.door_open()
 
 def exit():

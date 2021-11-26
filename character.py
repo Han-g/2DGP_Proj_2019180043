@@ -185,6 +185,7 @@ class Character:
     state_temp = 8
     def __init__(self):
         self.x, self.y = 600, 250
+        self.font = load_font('ENCR10B.TTF', 16)
         self.frame = 0
         self.sight = 0
         self.dir = 1
@@ -207,7 +208,7 @@ class Character:
 
     def update(self):
         self.current.do(self)
-        # print(self.x, self.y)
+
         if self.current == Attack and Character.state_temp > 0:
             Character.state_temp -= 1
 

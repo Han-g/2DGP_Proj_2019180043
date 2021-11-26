@@ -57,6 +57,7 @@ class Monster:
         self.Mnumber = 0
         self.current = Move
         self.hp = 100
+        self.timer = random.randint(2, 4)
         self.Time = 500
         self.frame = 0
         self.velocity_x = 0
@@ -87,6 +88,9 @@ class Monster:
         else:
             self.Time -= 1
 
+    def count_num_monster(self):
+        return self.Mnumber
+
     def get_bb(self):
         return self.x - 20, self.y - 20, self. x + 20, self.y + 20
 
@@ -98,5 +102,10 @@ class Monster:
 
     def nearby(self, change):
         change_x, change_y = change
-        self.velocity_x = change_x * (30 * random.randint(1, 50) / 30)
-        self.velocity_y = change_y * (30 * random.randint(1, 50) / 30)
+        if self.timer <= 0:
+            self.velocity_x = change_x * (30 * random.randint(1, 50) / 30)
+            self.velocity_y = change_y * (30 * random.randint(1, 50) / 30)
+            self.timer = random.randint(100, 130)
+        else:
+            self.timer -= 1
+
