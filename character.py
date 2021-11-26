@@ -235,20 +235,18 @@ class Character:
         self.current.draw(self)
 
     def collide_gimmick(self):
-        if self.Time == 500:
-            print('Hp Down')
-            self.hp -= 10
-            print(self.hp)
-            self.Time -= 1
-        elif self.Time == 0:
-            self.Time = 500
-        else:
-            self.Time -= 1
+        if self.current == Move:
+            if self.Time == 500:
+                self.hp -= 10
+                self.Time -= 1
+            elif self.Time == 0:
+                self.Time = 500
+            else:
+                self.Time -= 1
 
-
-    def game_over(self):
-        if self.hp < 0:
-            pass
+    def Attack_time(self):
+        if self.current == Attack:
+            return True
 
     def get_bb(self):
         return self.x - 12, self.y - 12, self.x + 12, self.y + 12

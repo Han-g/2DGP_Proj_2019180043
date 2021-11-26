@@ -26,12 +26,26 @@ def update():
         game_object.update()
         for i in monster:
             i.nearby(near_by(character, i))
+
     for monsters in monster:
         monsters.nearby(near_by(character, monsters))
         if collide(character, monsters):
             character.collide_gimmick()
+            if character.Attack_time():
+                monsters.collide_gimmick()
+
     if fallen(background, character):
         character.init_coor()
+
+    if character.hp <= 0:
+        exit()
+        enter()
+
+    if monsters.hp <= 0:
+        monsters.clear()
+
+    if monsters.Mnumber == 0:
+        background.door_open()
 
 def exit():
     Game_World.clear()

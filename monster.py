@@ -46,12 +46,18 @@ class Attack:
         pass
 
 
+class Clear:
+    def draw(monster):
+        pass
+
 class Monster:
     def __init__(self):
         self.M1image = load_image('M1_Move.png')
         self.x, self.y = random.randint(2, 6) * 100, random.randint(1, 2) * 100
         self.Mnumber = 0
         self.current = Move
+        self.hp = 100
+        self.Time = 500
         self.frame = 0
         self.velocity_x = 0
         self.velocity_y = 0
@@ -63,14 +69,23 @@ class Monster:
     def update(self):
         self.current.enter(self)
         self.current.do(self)
-        if self.Mnumber == 0:
-            pass
 
     def draw(self):
         self.current.draw(self)
 
     def handle_event(self, event):
         pass
+
+    def collide_gimmick(self):
+        if self.Time == 500:
+            print('Hp Down')
+            self.hp -= 10
+            print(self.hp)
+            self.Time -= 1
+        elif self.Time == 0:
+            self.Time = 500
+        else:
+            self.Time -= 1
 
     def get_bb(self):
         return self.x - 20, self.y - 20, self. x + 20, self.y + 20

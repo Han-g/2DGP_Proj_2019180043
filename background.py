@@ -29,12 +29,10 @@ class Background:
 
     def draw(self):
         self.image.draw(400, 250)
-        self.Door_image.clip_draw(self.frame * 128, 0, 128, 128, 400, 470)
+        self.Door_image.clip_draw(0, 0, 128, 128, 400, 470)
 
-        # boxes = self.get_bb4()
-        # for i in range(4):
-        #     box = boxes[(i * 4):(i * 4) + 4]
-        #     draw_rectangle(*box)
+    def door_open(self):
+        self.Door_image.clip_draw(self.frame * 128, 0, 128, 128, 400, 470)
 
     def update(self):
         self.frame = (self.frame + 1) % 7
