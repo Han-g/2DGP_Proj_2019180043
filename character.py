@@ -1,5 +1,6 @@
 from pico2d import *
 import Framework
+import refer_object
 import Game_World
 
 PIXEL_PER_METER = (10.0 / 0.3)
@@ -184,7 +185,7 @@ state_table = {
 class Character:
     state_temp = 8
     def __init__(self):
-        self.x, self.y = 600, 250
+        self.x, self.y = 650, 250
         self.font = load_font('ENCR10B.TTF', 16)
         self.frame = 0
         self.sight = 0
@@ -195,6 +196,7 @@ class Character:
         self.current = Move
         self.current.enter(self, None)
         self.event_que = []
+        self.font = load_font('ENCR10B.TTF', 16)
         self.Mimage = load_image('charmove2.png')
         self.Aimage = load_image('attack.png')
         self.Rimage = load_image('Roll.png')
@@ -224,6 +226,7 @@ class Character:
 
     def draw(self):
         self.current.draw(self)
+        self.font.draw(30, 450, 'HP : %d' % int(self.hp), (255, 10, 5))
         # draw_rectangle(*self.get_bb())
 
     def handle_event(self, event):
@@ -232,7 +235,7 @@ class Character:
             self.add_event(key_event)
 
     def init_coor(self):
-        self.x, self.y = 600, 250
+        self.x, self.y = 650, 250
         self.current.draw(self)
 
     def collide_gimmick(self):

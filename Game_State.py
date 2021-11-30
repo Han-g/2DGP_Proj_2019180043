@@ -8,18 +8,22 @@ from character import Character
 from background import Background
 from background import Hole
 from monster import Monster
+from weapon import Weapon
+
 
 def enter():
-    global character, background, monster, hole
+    global character, background, monster, hole, weapon
     character = Character()
     background = Background()
     hole = Hole()
     monster = [Monster() for i in range(random.randint(3, 8))]
+    weapon = Weapon()
 
     Game_World.add_object(background, 0)
-    Game_World.add_object(character, 1)
-    Game_World.add_object(hole, 2)
+    Game_World.add_object(character, 2)
+    Game_World.add_object(hole, 1)
     Game_World.add_objects(monster, 2)
+
 
 def update():
     for game_object in Game_World.all_objects():
@@ -29,10 +33,10 @@ def update():
 
     for monsters in monster:
         monsters.nearby(near_by(character, monsters))
-        if collide(character, monsters):
+        if character.Attack_time() and collide(weapon, monsters):
+            monsters.collide_gimmick()
+        elif collide(character, monsters):
             character.collide_gimmick()
-            if character.Attack_time():
-                monsters.collide_gimmick()
 
     if fallen(background, character):
         character.init_coor()
@@ -47,11 +51,14 @@ def update():
     if monsters.count_num_monster():
         background.door_open()
 
+
 def exit():
     Game_World.clear()
 
+
 def pause():
     pass
+
 
 def draw():
     clear_canvas()
@@ -59,8 +66,10 @@ def draw():
         game_object.draw()
     update_canvas()
 
+
 def resume():
     pass
+
 
 def handle_event():
     events = get_events()
@@ -121,8 +130,6 @@ def get_coordinate(a):
     y = a.get_y()
     return x, y
 
-def get_abs(a):
-    return a / abs(a)
 
 def near_by(a, b):
     x1, y1 = get_coordinate(a)
@@ -141,4 +148,3 @@ def near_by(a, b):
     elif y1 - y2 > 0:
         move_val_y = 1
     return move_val_x, move_val_y
-

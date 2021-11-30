@@ -1,6 +1,7 @@
 from pico2d import *
 import random
 import Framework
+import refer_object
 
 PIXEL_PER_METER = (10.0 / 0.3)
 MOVE_SPEED_KMPH = 10
