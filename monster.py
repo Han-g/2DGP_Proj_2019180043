@@ -12,7 +12,7 @@ MOVE_SPEED_PPS = (MOVE_SPEED_MPS * PIXEL_PER_METER)
 
 class Move:
     def enter(monster):
-        monster.Mnumber = random.randint(3, 8)
+        monster.Mnumber = 1 #random.randint(3, 8)
 
     def exit(monster):
         pass
@@ -75,13 +75,16 @@ class Monster:
     def draw(self):
         self.current.draw(self)
 
+    def clear(self):
+        pass
+
     def handle_event(self, event):
         pass
 
     def collide_gimmick(self):
         if self.Time == 500:
             print('Hp Down')
-            self.hp -= 10
+            self.hp -= 100
             print(self.hp)
             self.Time -= 1
         elif self.Time == 0:

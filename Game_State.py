@@ -9,47 +9,56 @@ from background import Background
 from background import Hole
 from monster import Monster
 from weapon import Weapon
+import refer_object
 
 
 def enter():
     global character, background, monster, hole, weapon
-    character = Character()
-    background = Background()
-    hole = Hole()
-    monster = [Monster() for i in range(random.randint(3, 8))]
-    weapon = Weapon()
+    refer_object.character = Character()
+    refer_object.background = Background()
+    refer_object.hole = Hole()
+    refer_object.monster = [Monster() for i in range(random.randint(3, 8))]
+    refer_object.weapon = Weapon()
 
-    Game_World.add_object(background, 0)
-    Game_World.add_object(character, 2)
-    Game_World.add_object(hole, 1)
-    Game_World.add_objects(monster, 2)
+    Game_World.add_object(refer_object.background, 0)
+    Game_World.add_object(refer_object.character, 2)
+    Game_World.add_object(refer_object.hole, 1)
+    Game_World.add_object(refer_object.weapon, 3)
+    Game_World.add_objects(refer_object.monster, 2)
 
 
 def update():
     for game_object in Game_World.all_objects():
         game_object.update()
-        for i in monster:
-            i.nearby(near_by(character, i))
+        for i in refer_object.monster:
+            i.nearby(near_by(refer_object.character, i))
 
-    for monsters in monster:
-        monsters.nearby(near_by(character, monsters))
-        if character.Attack_time() and collide(weapon, monsters):
+    m = []
+
+    for index, monsters in enumerate(refer_object.monster):
+        monsters.nearby(near_by(refer_object.character, monsters))
+        if refer_object.character.Attack_time() and collide(refer_object.weapon, monsters):
             monsters.collide_gimmick()
-        elif collide(character, monsters):
-            character.collide_gimmick()
+        elif collide(refer_object.character, monsters):
+            refer_object.character.collide_gimmick()
 
-    if fallen(background, character):
-        character.init_coor()
+        if monsters.hp <= 0:
+            print('Dead')
+            m.append(monsters)
 
-    if character.hp <= 0:
+    refer_object.monster = [monsters for monsters in refer_object.monster if monsters not in m]
+    for monsters in m:
+        Game_World.remove_object(monsters)
+
+    if len(refer_object.monster) == 0:
+        refer_object.background.door_open()
+
+    if fallen(refer_object.background, refer_object.character):
+        refer_object.character.init_coor()
+
+    if refer_object.character.hp <= 0:
         exit()
         enter()
-
-    if monsters.hp <= 0:
-        monsters.clear()
-
-    if monsters.count_num_monster():
-        background.door_open()
 
 
 def exit():
@@ -79,7 +88,7 @@ def handle_event():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
                 Framework.quit()
         else:
-            character.handle_event(event)
+            refer_object.character.handle_event(event)
 
 
 def collide(a, b):

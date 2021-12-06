@@ -14,7 +14,7 @@ ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAME_PER_ACTION = 8
 
 UP_ON, UNDER_ON, LEFT_ON, RIGHT_ON, UP_OFF, UNDER_OFF, LEFT_OFF, RIGHT_OFF, ATT_ON, ATT_OFF, \
-DFF_ON, DFF_OFF, ROLL_ON, ROLL_OFF = range(14)
+DFF_ON, DFF_OFF, ROLL_ON, ROLL_OFF, ATT_MODE = range(15)
 
 key_event_table = {
     (SDL_KEYDOWN, SDLK_w): UP_ON,
@@ -30,7 +30,8 @@ key_event_table = {
     (SDL_KEYDOWN, SDLK_k): DFF_ON,
     (SDL_KEYUP, SDLK_k): DFF_OFF,
     (SDL_KEYDOWN, SDLK_SPACE): ROLL_ON,
-    (SDL_KEYUP, SDLK_SPACE): ROLL_OFF
+    (SDL_KEYUP, SDLK_SPACE): ROLL_OFF,
+    (SDL_KEYDOWN, SDLK_l): ATT_MODE
 }
 
 
@@ -97,11 +98,40 @@ class Attack:
         pass
 
     def do(character):
-        character.frame = (character.frame + FRAME_PER_ACTION * ACTION_PER_TIME * Framework.frame_time) % 8
-        delay(0.1)
+        character.frame_att = (character.frame_att + FRAME_PER_ACTION * ACTION_PER_TIME * Framework.frame_time) % 18
+        if ATT_MODE:
+            character.att_state = (character.att_state + 1) % 3
 
     def draw(character):
-        character.Aimage.clip_draw(int(character.frame) * 31, 0, 31, 42, character.x, character.y)
+        if character.att_state == 0:
+            if character.sight == 0:
+                character.Short_Aimage.clip_draw(int(character.frame_att) * 128, 128*3, 128, 128, character.x, character.y)
+            elif character.sight == 1:
+                character.Short_Aimage.clip_draw(int(character.frame_att) * 128, 128*0, 128, 128, character.x, character.y)
+            elif character.sight == 2:
+                character.Short_Aimage.clip_draw(int(character.frame_att) * 128, 128*1, 128, 128, character.x, character.y)
+            elif character.sight == 3:
+                character.Short_Aimage.clip_draw(int(character.frame_att) * 128, 128*2, 128, 128, character.x, character.y)
+
+        elif character.att_state == 1:
+            if character.sight == 0:
+                character.Long_Aimage.clip_draw(int(character.frame_att) * 128, 128*3, 128, 128, character.x, character.y)
+            elif character.sight == 1:
+                character.Long_Aimage.clip_draw(int(character.frame_att) * 128, 128*0, 128, 128, character.x, character.y)
+            elif character.sight == 2:
+                character.Long_Aimage.clip_draw(int(character.frame_att) * 128, 128*1, 128, 128, character.x, character.y)
+            elif character.sight == 3:
+                character.Long_Aimage.clip_draw(int(character.frame_att) * 128, 128*2, 128, 128, character.x, character.y)
+
+        elif character.att_state == 2:
+            if character.sight == 0:
+                character.Spear_Aimage.clip_draw(int(character.frame_att) * 128, 128*3, 128, 128, character.x, character.y)
+            elif character.sight == 1:
+                character.Spear_Aimage.clip_draw(int(character.frame_att) * 128, 128*0, 128, 128, character.x, character.y)
+            elif character.sight == 2:
+                character.Spear_Aimage.clip_draw(int(character.frame_att) * 128, 128*1, 128, 128, character.x, character.y)
+            elif character.sight == 3:
+                character.Spear_Aimage.clip_draw(int(character.frame_att) * 128, 128*2, 128, 128, character.x, character.y)
 
 
 class Dffense:
@@ -188,6 +218,7 @@ class Character:
         self.x, self.y = 650, 250
         self.font = load_font('ENCR10B.TTF', 16)
         self.frame = 0
+        self.frame_att = 0
         self.sight = 0
         self.dir = 1
         self.Time = 500
@@ -195,10 +226,12 @@ class Character:
         self.hp = 200
         self.current = Move
         self.current.enter(self, None)
+        self.att_state = 0
         self.event_que = []
-        self.font = load_font('ENCR10B.TTF', 16)
         self.Mimage = load_image('charmove2.png')
-        self.Aimage = load_image('attack.png')
+        self.Short_Aimage = load_image('sword_att.png')
+        self.Long_Aimage = load_image('attack.png')
+        self.Spear_Aimage = load_image('spear_att.png')
         self.Rimage = load_image('Roll.png')
         self.Dimage_R = load_image('shield_Right.png')
         self.Dimage_L = load_image('shield_Left.png')
