@@ -1,5 +1,6 @@
 from pico2d import *
 import Framework
+import threading
 import refer_object
 import Game_World
 
@@ -9,12 +10,13 @@ MOVE_SPEED_MPM = (MOVE_SPEED_KMPH * 1000.0 / 60.0)
 MOVE_SPEED_MPS = (MOVE_SPEED_MPM / 60.0)
 MOVE_SPEED_PPS = (MOVE_SPEED_MPS * PIXEL_PER_METER)
 
-TIME_PER_ACTION = 0.5
+TIME_PER_ACTION = 1.0
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAME_PER_ACTION = 8
+FRAME_PER_ATTACK = 18
 
 UP_ON, UNDER_ON, LEFT_ON, RIGHT_ON, UP_OFF, UNDER_OFF, LEFT_OFF, RIGHT_OFF, ATT_ON, ATT_OFF, \
-DFF_ON, DFF_OFF, ROLL_ON, ROLL_OFF, ATT_MODE = range(15)
+DFF_ON, DFF_OFF, ROLL_ON, ROLL_OFF, ATT_MODE, ATT_MOFF = range(16)
 
 key_event_table = {
     (SDL_KEYDOWN, SDLK_w): UP_ON,
@@ -31,14 +33,26 @@ key_event_table = {
     (SDL_KEYUP, SDLK_k): DFF_OFF,
     (SDL_KEYDOWN, SDLK_SPACE): ROLL_ON,
     (SDL_KEYUP, SDLK_SPACE): ROLL_OFF,
-    (SDL_KEYDOWN, SDLK_l): ATT_MODE
+    (SDL_KEYDOWN, SDLK_l): ATT_MODE,
+    (SDL_KEYUP, SDLK_l): ATT_MOFF
 }
 
 
 class Move:
     def enter(character, event):
-        if event == RIGHT_OFF or event == LEFT_OFF or event == UP_OFF or event == UNDER_OFF:
-            character.velocity = 0
+        print(character.velocity)
+        if character.velocity != 0:
+            if event == RIGHT_OFF or event == LEFT_OFF or event == UP_OFF or event == UNDER_OFF:
+                character.velocity = 0
+        else:
+            if event == RIGHT_OFF:
+                character.velocity -= 1
+            if event == LEFT_OFF:
+                character.velocity += 1
+            if event == UP_OFF:
+                character.velocity -= 1
+            if event == UNDER_OFF:
+                character.velocity += 1
 
         if event == RIGHT_ON:
             character.velocity += MOVE_SPEED_PPS
@@ -68,19 +82,9 @@ class Move:
             character.x += character.velocity * Framework.frame_time
         elif character.sight == 3:
             character.x += character.velocity * Framework.frame_time
-        # character.x = clamp(25, character.x, 775)
-        # character.y = clamp(20, character.y, 470)
+        character.x = clamp(25, character.x, 775)
+        character.y = clamp(20, character.y, 470)
         # print(character.velocity * Framework.frame_time)
-
-        # 맵 벗어나지 않게 하기
-        if character.x > 776:
-            character.x = 776
-        elif character.y > 468:
-            character.y = 468
-        elif character.x < 24:
-            character.x = 24
-        elif character.y < 21:
-            character.y = 21
 
     def draw(character):
         if character.velocity != 0:
@@ -91,16 +95,13 @@ class Move:
 
 class Attack:
     def enter(character, event):
-        if event == ATT_ON:
-            pass
+        pass
 
     def exit(character, event):
         pass
 
     def do(character):
-        character.frame_att = (character.frame_att + FRAME_PER_ACTION * ACTION_PER_TIME * Framework.frame_time) % 18
-        if ATT_MODE:
-            character.att_state = (character.att_state + 1) % 3
+        character.frame_att = (character.frame_att + FRAME_PER_ATTACK * ACTION_PER_TIME * Framework.frame_time) % 18
 
     def draw(character):
         if character.att_state == 0:
@@ -115,16 +116,6 @@ class Attack:
 
         elif character.att_state == 1:
             if character.sight == 0:
-                character.Long_Aimage.clip_draw(int(character.frame_att) * 128, 128*3, 128, 128, character.x, character.y)
-            elif character.sight == 1:
-                character.Long_Aimage.clip_draw(int(character.frame_att) * 128, 128*0, 128, 128, character.x, character.y)
-            elif character.sight == 2:
-                character.Long_Aimage.clip_draw(int(character.frame_att) * 128, 128*1, 128, 128, character.x, character.y)
-            elif character.sight == 3:
-                character.Long_Aimage.clip_draw(int(character.frame_att) * 128, 128*2, 128, 128, character.x, character.y)
-
-        elif character.att_state == 2:
-            if character.sight == 0:
                 character.Spear_Aimage.clip_draw(int(character.frame_att) * 128, 128*3, 128, 128, character.x, character.y)
             elif character.sight == 1:
                 character.Spear_Aimage.clip_draw(int(character.frame_att) * 128, 128*0, 128, 128, character.x, character.y)
@@ -132,6 +123,16 @@ class Attack:
                 character.Spear_Aimage.clip_draw(int(character.frame_att) * 128, 128*1, 128, 128, character.x, character.y)
             elif character.sight == 3:
                 character.Spear_Aimage.clip_draw(int(character.frame_att) * 128, 128*2, 128, 128, character.x, character.y)
+
+        elif character.att_state == 2:
+            if character.sight == 0:
+                character.Long_Aimage.clip_draw(int(character.frame_att) * 128, 128*3, 128, 128, character.x, character.y)
+            elif character.sight == 1:
+                character.Long_Aimage.clip_draw(int(character.frame_att) * 128, 128*0, 128, 128, character.x, character.y)
+            elif character.sight == 2:
+                character.Long_Aimage.clip_draw(int(character.frame_att) * 128, 128*1, 128, 128, character.x, character.y)
+            elif character.sight == 3:
+                character.Long_Aimage.clip_draw(int(character.frame_att) * 128, 128*2, 128, 128, character.x, character.y)
 
 
 class Dffense:
@@ -143,7 +144,6 @@ class Dffense:
 
     def do(character):
         character.frame = (character.frame + FRAME_PER_ACTION * ACTION_PER_TIME * Framework.frame_time) % 8
-        delay(0.1)
 
     def draw(character):
         if character.sight == 0:
@@ -182,8 +182,7 @@ class Roll:
         elif character.y < 21:
             character.y = 21
 
-        character.frame = (character.frame + 1) % 8
-        delay(0.1)
+        character.frame = (character.frame + FRAME_PER_ACTION * ACTION_PER_TIME * Framework.frame_time) % 8
 
     def draw(character):
         if character.sight == 0:
@@ -197,16 +196,16 @@ class Roll:
 
 
 state_table = {
-    Move: {RIGHT_ON: Move, LEFT_ON: Move, UP_ON: Move, UNDER_ON: Move, \
+    Move: {RIGHT_ON: Move, LEFT_ON: Move, UP_ON: Move, UNDER_ON: Move, ATT_MODE: Move, ATT_MOFF: Move, \
            RIGHT_OFF: Move, LEFT_OFF: Move, UP_OFF: Move, UNDER_OFF: Move, \
            ATT_ON: Attack, ROLL_ON: Roll, DFF_ON: Dffense, ATT_OFF: Move, ROLL_OFF: Move, DFF_OFF: Move},
-    Attack: {RIGHT_ON: Attack, LEFT_ON: Attack, UP_ON: Attack, UNDER_ON: Attack, \
+    Attack: {RIGHT_ON: Attack, LEFT_ON: Attack, UP_ON: Attack, UNDER_ON: Attack, ATT_MODE: Attack, ATT_MOFF: Attack, \
              RIGHT_OFF: Attack, LEFT_OFF: Attack, UP_OFF: Attack, UNDER_OFF: Attack, \
-             ATT_ON: Attack, ROLL_ON: Attack, DFF_ON: Attack, ATT_OFF: Move, ROLL_OFF: Move, DFF_OFF: Move},
-    Dffense: {RIGHT_ON: Dffense, LEFT_ON: Dffense, UP_ON: Dffense, UNDER_ON: Dffense, \
+             ATT_ON: Attack, ROLL_ON: Attack, DFF_ON: Attack, ATT_OFF: Move, ROLL_OFF: Attack, DFF_OFF: Attack},
+    Dffense: {RIGHT_ON: Dffense, LEFT_ON: Dffense, UP_ON: Dffense, UNDER_ON: Dffense, ATT_MODE: Move, ATT_MOFF: Move, \
               RIGHT_OFF: Dffense, LEFT_OFF: Dffense, UP_OFF: Dffense, UNDER_OFF: Dffense, \
               ATT_ON: Dffense, ROLL_ON: Dffense, DFF_ON: Dffense, ATT_OFF: Dffense, ROLL_OFF: Dffense, DFF_OFF: Move},
-    Roll: {RIGHT_ON: Roll, LEFT_ON: Roll, UP_ON: Roll, UNDER_ON: Roll, \
+    Roll: {RIGHT_ON: Roll, LEFT_ON: Roll, UP_ON: Roll, UNDER_ON: Roll, ATT_MODE: Move, ATT_MOFF: Move, \
            RIGHT_OFF: Roll, LEFT_OFF: Roll, UP_OFF: Roll, UNDER_OFF: Roll, \
            ATT_ON: Roll, ROLL_ON: Roll, DFF_ON: Roll, ATT_OFF: Move, ROLL_OFF: Move, DFF_OFF: Move}
 }
@@ -214,6 +213,7 @@ state_table = {
 
 class Character:
     state_temp = 8
+    hp = 200
     def __init__(self):
         self.x, self.y = 650, 250
         self.font = load_font('ENCR10B.TTF', 16)
@@ -221,9 +221,8 @@ class Character:
         self.frame_att = 0
         self.sight = 0
         self.dir = 1
-        self.Time = 500
+        self.Time = 0
         self.velocity = 0
-        self.hp = 200
         self.current = Move
         self.current.enter(self, None)
         self.att_state = 0
@@ -246,12 +245,17 @@ class Character:
 
         if self.current == Attack and Character.state_temp > 0:
             Character.state_temp -= 1
+        else:
+            Character.state_temp = 8
 
-        elif self.current == Roll and Character.state_temp > 0:
+        if self.current == Roll and Character.state_temp > 0:
             Character.state_temp -= 1
+        else:
+            Character.state_temp = 8
 
-        elif len(self.event_que) > 0:
-            Character.state_temp = 7
+        if len(self.event_que) > 0:
+            if Character.state_temp <= 0:
+                Character.state_temp = 8
             event = self.event_que.pop()
             self.current.exit(self, event)
             self.current = state_table[self.current][event]
@@ -259,7 +263,7 @@ class Character:
 
     def draw(self):
         self.current.draw(self)
-        self.font.draw(30, 450, 'HP : %d' % int(self.hp), (255, 10, 5))
+        self.font.draw(30, 450, 'HP : %d' % int(Character.hp), (255, 10, 5))
         # draw_rectangle(*self.get_bb())
 
     def handle_event(self, event):
@@ -272,14 +276,10 @@ class Character:
         self.current.draw(self)
 
     def collide_gimmick(self):
-        if self.current == Move:
-            if self.Time == 500:
-                self.hp -= 10
-                self.Time -= 1
-            elif self.Time == 0:
-                self.Time = 500
-            else:
-                self.Time -= 1
+        Framework.timer += Framework.frame_time
+        if Framework.timer > 0.5:
+            Framework.timer = 0
+            Character.hp -= 10
 
     def Attack_time(self):
         if self.current == Attack:

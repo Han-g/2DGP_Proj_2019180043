@@ -12,22 +12,20 @@ MOVE_SPEED_PPS = (MOVE_SPEED_MPS * PIXEL_PER_METER)
 
 class Move:
     def enter(monster):
-        monster.Mnumber = 1 #random.randint(3, 8)
+        monster.Mnumber = len(refer_object.monster)
 
     def exit(monster):
         pass
 
     def do(monster):
-        monster.x += monster.velocity_x * Framework.frame_time
-        monster.y += monster.velocity_y * Framework.frame_time
-        if monster.x > 776:
-            monster.x = 776
-        elif monster.x < 24:
-            monster.x = 24
-        if monster.y > 468:
-            monster.y = 468
-        elif monster.y < 21:
-            monster.y = 21
+        ru, lu, ld, rd = (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0)
+        monster.hole_ignore(ru, lu, ld, rd)
+        if ru[0] == monster.x and ru[1] == monster.y and ru[2] == monster.x and ru[3] == monster.y:
+            monster.x += monster.velocity_x * Framework.frame_time
+            monster.y += monster.velocity_y * Framework.frame_time
+
+        monster.x = clamp(25, monster.x, 775)
+        monster.y = clamp(20, monster.y, 470)
 
     def draw(monster):
         monster.M1image.clip_draw(monster.frame * 36, 0, 36, 60, monster.x, monster.y)
@@ -82,15 +80,17 @@ class Monster:
         pass
 
     def collide_gimmick(self):
-        if self.Time == 500:
-            print('Hp Down')
-            self.hp -= 100
-            print(self.hp)
-            self.Time -= 1
-        elif self.Time == 0:
-            self.Time = 500
-        else:
-            self.Time -= 1
+        Framework.timer += Framework.frame_time
+        if Framework.timer > 0.5:
+            self.hp -= 10
+            if self.x - refer_object.character.x > 0:
+                self.x += 3
+            elif self.x - refer_object.character.x < 0:
+                self.x -= 3
+            if self.y - refer_object.character.y > 0:
+                self.y += 3
+            elif self.y - refer_object.character.y < 0:
+                self.y -= 3
 
     def count_num_monster(self):
         return self.Mnumber
@@ -103,6 +103,13 @@ class Monster:
 
     def get_y(self):
         return self.y
+
+    def hole_ignore(self, ru, lu, ld, rd):
+        # lu = (0, 0, 0, 0)
+        # ld = (0, 0, 0, 0)
+        # ru = (0, 0, 0, 0)
+        # rd = (0, 0, 0, 0)
+        (ru, lu, ld, rd) = refer_object.background.get_bb4()
 
     def nearby(self, change):
         change_x, change_y = change

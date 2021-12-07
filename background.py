@@ -29,16 +29,20 @@ class Background:
     def add_event(self, event):
         pass
 
+    l = 0
     def draw(self):
         self.image.draw(400, 250)
-        self.Door_image.clip_draw(0, 0, 128, 128, 400, 470)
-
-    def door_open(self):
-        self.Door_image.clip_draw(self.frame * 128, 0, 128, 128, 400, 470)
+        if len(refer_object.monster) != 0:
+            self.Door_image.clip_draw(0, 0, 128, 128, 400, 470)
+        elif len(refer_object.monster) == 0:
+            if Background.l != 0:
+                self.Door_image.clip_draw(self.frame * 128, 0, 128, 128, 400, 470)
+                Background.l -= 0.01
+            elif Background.l == 0:
+                self.Door_image.clip_draw(768, 0, 128, 128, 400, 470)
 
     def update(self):
-        self.frame = (self.frame + 1) % 7
-        # delay(0.2)
+        self.frame = (self.frame + 0.01) % 7
 
     def handle_event(self, event):
         pass
@@ -47,7 +51,7 @@ class Background:
         pass
 
     def get_bb(self):
-        return self.x + 210, self.y + 130, self.x + 400, self.y + 250
+        return self.x + 10, self.y + 220, self.x + 10, self.y + 250
 
     def get_bb4(self):
         if Hole.num == 0:

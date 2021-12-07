@@ -1,6 +1,7 @@
 import random
 
 from pico2d import *
+import threading
 import Game_World
 import Framework
 
@@ -43,21 +44,24 @@ def update():
             refer_object.character.collide_gimmick()
 
         if monsters.hp <= 0:
-            print('Dead')
             m.append(monsters)
 
     refer_object.monster = [monsters for monsters in refer_object.monster if monsters not in m]
     for monsters in m:
         Game_World.remove_object(monsters)
 
-    if len(refer_object.monster) == 0:
-        refer_object.background.door_open()
-
     if fallen(refer_object.background, refer_object.character):
         refer_object.character.init_coor()
 
     if refer_object.character.hp <= 0:
         exit()
+        enter()
+        Character.hp = 200
+
+    if len(refer_object.monster) == 0 and collide(refer_object.background, refer_object.character):
+        Game_World.remove_object(refer_object.background)
+        Game_World.remove_object(refer_object.character)
+        Game_World.remove_object(refer_object.monster)
         enter()
 
 
