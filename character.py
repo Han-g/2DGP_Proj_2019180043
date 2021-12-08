@@ -1,6 +1,6 @@
 from pico2d import *
 import Framework
-import threading
+import pygame
 import refer_object
 import Game_World
 
@@ -38,6 +38,7 @@ key_event_table = {
 
 class Move:
     def enter(character, event):
+        Character.state_temp = 18
         if character.velocity != 0:
             if event == RIGHT_OFF or event == LEFT_OFF or event == UP_OFF or event == UNDER_OFF:
                 character.velocity = 0
@@ -87,13 +88,17 @@ class Move:
 
 class Attack:
     def enter(character, event):
+        Character.state_temp = 8
         pass
 
     def exit(character, event):
         pass
 
     def do(character):
-        character.frame_att = (character.frame_att + FRAME_PER_ATTACK * ACTION_PER_TIME * Framework.frame_time) % 17
+        next_frame = (character.frame_att + FRAME_PER_ATTACK * ACTION_PER_TIME * Framework.frame_time)
+        character.frame_att = next_frame % 17
+        if next_frame >= 17:
+            Character.state_temp = 0
 
     def draw(character):
         if character.att_state == 0:
@@ -150,6 +155,7 @@ class Dffense:
 
 class Roll:
     def enter(character, event):
+        Character.state_temp = 8
         pass
 
     def exit(character, event):
@@ -167,7 +173,11 @@ class Roll:
 
         character.x = clamp(25, character.x, 775)
         character.y = clamp(20, character.y, 470)
-        character.frame = (character.frame + FRAME_PER_ACTION * ACTION_PER_TIME * Framework.frame_time) % 8
+        next_frame = (character.frame + FRAME_PER_ACTION * ACTION_PER_TIME * Framework.frame_time)
+        character.frame = next_frame % 8
+        if next_frame >= 8:
+            Character.state_temp = 0
+
 
     def draw(character):
         if character.sight == 0:
@@ -212,6 +222,8 @@ class Character:
         self.current.enter(self, None)
         self.att_state = 0
         self.event_que = []
+        self.HP = load_image('hp_gauge.png')
+        self.HPimage = load_image('blood_red_bar.png')
         self.Mimage = load_image('charmove2.png')
         self.Short_Aimage = load_image('sword_att.png')
         self.Long_Aimage = load_image('attack.png')
@@ -229,26 +241,35 @@ class Character:
         self.current.do(self)
         self.weapon_change()
 
-        if self.current == Attack and Character.state_temp > 0:
-            Character.state_temp -= 1
-            self.current.exit(self, Attack)
-            self.current.enter(self, Attack)
-            print(Character.state_temp)
-        elif self.current == Attack and Character.state_temp == 0:
-            Character.state_temp = 18
+        if self.current == Attack:
+            # if Character.state_temp > 0:
+            #     Character.state_temp -= 1
+                # self.current.exit(self, Attack)
+                # self.current.enter(self, Attack)
 
-        if self.current == Roll and Character.state_temp > 0:
-            Character.state_temp -= 1
-            self.current.exit(self, Roll)
-            self.current.enter(self, Roll)
-            print(Character.state_temp)
-        elif self.current == Roll and Character.state_temp == 0:
-            Character.state_temp = 18
+            if Character.state_temp == 0:
+                Character.state_temp = 18
+                self.current.exit(self, None)
+                self.current = Move
+                self.current.enter(self, None)
+                self.velocity = 0
+
+        elif self.current == Roll:
+            # if Character.state_temp > 0:
+            #     Character.state_temp -= 1
+                # self.current.exit(self, Roll)
+                # self.current.enter(self, Roll)
+
+            if Character.state_temp == 0:
+                Character.state_temp = 18
+                self.current.exit(self, None)
+                self.current = Move
+                self.current.enter(self, None)
 
         if Character.state_temp == 18:
             if len(self.event_que) > 0:
-                if Character.state_temp <= 0:
-                    Character.state_temp = 8
+                # if Character.state_temp <= 0:
+                #     Character.state_temp = 8
                 event = self.event_que.pop()
                 self.current.exit(self, event)
                 self.current = state_table[self.current][event]
@@ -256,10 +277,14 @@ class Character:
 
     def draw(self):
         self.current.draw(self)
-        self.font.draw(30, 450, 'HP : %d' % int(Character.hp), (255, 10, 5))
+        self.HPimage.draw(70, 470, 120, 40)
+        self.HP.clip_draw(0, 0, int((self.hp / 200) * 120), 40, 10 + (int((self.hp / 200) * 120 / 2)), 470)
+
         # draw_rectangle(*self.get_bb())
 
     def handle_event(self, event):
+        if Character.state_temp != 18:
+            return
         if (event.type, event.key) in key_event_table:
             key_event = key_event_table[(event.type, event.key)]
             self.add_event(key_event)

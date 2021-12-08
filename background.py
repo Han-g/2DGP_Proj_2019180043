@@ -30,6 +30,7 @@ class Background:
         pass
 
     l = 0
+
     def draw(self):
         self.image.draw(400, 250)
         if len(refer_object.monster) != 0:
@@ -51,7 +52,7 @@ class Background:
         pass
 
     def get_bb(self):
-        return self.x + 10, self.y + 220, self.x + 10, self.y + 250
+        return self.x -40, self.y + 200, self.x + 40, self.y + 250
 
     def get_bb4(self):
         if Hole.num == 0:

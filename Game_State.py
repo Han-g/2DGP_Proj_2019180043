@@ -52,6 +52,7 @@ def update():
     if fallen(refer_object.background, refer_object.character):
         refer_object.character.init_coor()
 
+
     if refer_object.character.hp <= 0:
         exit()
         enter()
