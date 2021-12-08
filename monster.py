@@ -9,6 +9,10 @@ MOVE_SPEED_MPM = (MOVE_SPEED_KMPH * 1000.0 / 60.0)
 MOVE_SPEED_MPS = (MOVE_SPEED_MPM / 60.0)
 MOVE_SPEED_PPS = (MOVE_SPEED_MPS * PIXEL_PER_METER)
 
+TIME_PER_ACTION = 1.0
+ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
+FRAME_PER_ACTION = 8
+
 
 class Move:
     def enter(monster):
@@ -18,17 +22,17 @@ class Move:
         pass
 
     def do(monster):
-        ru, lu, ld, rd = (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0)
-        monster.hole_ignore(ru, lu, ld, rd)
-        if ru[0] == monster.x and ru[1] == monster.y and ru[2] == monster.x and ru[3] == monster.y:
-            monster.x += monster.velocity_x * Framework.frame_time
-            monster.y += monster.velocity_y * Framework.frame_time
+        monster.frame = (monster.frame + FRAME_PER_ACTION * ACTION_PER_TIME * Framework.frame_time) % 8
+        monster.x += monster.velocity_x * Framework.frame_time
+        monster.y += monster.velocity_y * Framework.frame_time
 
         monster.x = clamp(25, monster.x, 775)
         monster.y = clamp(20, monster.y, 470)
 
     def draw(monster):
-        monster.M1image.clip_draw(monster.frame * 36, 0, 36, 60, monster.x, monster.y)
+        if monster.Mkind == 0: monster.M1image.clip_draw(int(monster.frame) * 36, 0, 36, 60, monster.x, monster.y)
+        elif monster.Mkind == 1: monster.M2image.clip_draw(int(monster.frame) * 48, 0, 48, 48, monster.x, monster.y)
+        elif monster.Mkind == 2: monster.M3image.clip_draw(int(monster.frame) * 48, 0, 48, 48, monster.x, monster.y)
 
 
 class Attack:
@@ -52,8 +56,11 @@ class Clear:
 class Monster:
     def __init__(self):
         self.M1image = load_image('M1_Move.png')
+        self.M2image = load_image('M2_Move.png')
+        self.M3image = load_image('M3_Move.png')
         self.x, self.y = random.randint(2, 6) * 100, random.randint(1, 2) * 100
         self.Mnumber = 0
+        self.Mkind = random.randint(0, 2)
         self.current = Move
         self.hp = 100
         self.timer = random.randint(2, 4)
@@ -103,13 +110,6 @@ class Monster:
 
     def get_y(self):
         return self.y
-
-    def hole_ignore(self, ru, lu, ld, rd):
-        # lu = (0, 0, 0, 0)
-        # ld = (0, 0, 0, 0)
-        # ru = (0, 0, 0, 0)
-        # rd = (0, 0, 0, 0)
-        (ru, lu, ld, rd) = refer_object.background.get_bb4()
 
     def nearby(self, change):
         change_x, change_y = change

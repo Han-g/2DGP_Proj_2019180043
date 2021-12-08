@@ -41,4 +41,8 @@ class Weapon:
         self.x, self.y = (refer_object.character.get_x()), refer_object.character.get_y()
 
     def get_bb(self):
-        return self.x - 35, self.y - 35, self.x + 35, self.y + 35
+        if refer_object.character.sight == 0: w = (-30, -30, 30, 0)
+        elif refer_object.character.sight == 1: w = (-30, 0, 30, 30)
+        elif refer_object.character.sight == 2: w = (0, -30, 30, 30)
+        elif refer_object.character.sight == 3: w = (-30, -30, 0, 30)
+        return self.x + w[0], self.y + w[1], self.x + w[2], self.y + w[3]

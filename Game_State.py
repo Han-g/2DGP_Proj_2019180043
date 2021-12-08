@@ -1,7 +1,6 @@
 import random
 
 from pico2d import *
-import threading
 import Game_World
 import Framework
 

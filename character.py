@@ -16,7 +16,7 @@ FRAME_PER_ACTION = 8
 FRAME_PER_ATTACK = 18
 
 UP_ON, UNDER_ON, LEFT_ON, RIGHT_ON, UP_OFF, UNDER_OFF, LEFT_OFF, RIGHT_OFF, ATT_ON, ATT_OFF, \
-DFF_ON, DFF_OFF, ROLL_ON, ROLL_OFF, ATT_MODE, ATT_MOFF = range(16)
+DFF_ON, DFF_OFF, ROLL_ON, ROLL_OFF = range(14)
 
 key_event_table = {
     (SDL_KEYDOWN, SDLK_w): UP_ON,
@@ -32,27 +32,19 @@ key_event_table = {
     (SDL_KEYDOWN, SDLK_k): DFF_ON,
     (SDL_KEYUP, SDLK_k): DFF_OFF,
     (SDL_KEYDOWN, SDLK_SPACE): ROLL_ON,
-    (SDL_KEYUP, SDLK_SPACE): ROLL_OFF,
-    (SDL_KEYDOWN, SDLK_l): ATT_MODE,
-    (SDL_KEYUP, SDLK_l): ATT_MOFF
+    (SDL_KEYUP, SDLK_SPACE): ROLL_OFF
 }
 
 
 class Move:
     def enter(character, event):
-        print(character.velocity)
         if character.velocity != 0:
             if event == RIGHT_OFF or event == LEFT_OFF or event == UP_OFF or event == UNDER_OFF:
                 character.velocity = 0
-        else:
-            if event == RIGHT_OFF:
-                character.velocity -= 1
-            if event == LEFT_OFF:
-                character.velocity += 1
-            if event == UP_OFF:
-                character.velocity -= 1
-            if event == UNDER_OFF:
-                character.velocity += 1
+        elif event == RIGHT_OFF: character.velocity -= 1
+        elif event == LEFT_OFF: character.velocity += 1
+        elif event == UP_OFF: character.velocity -= 1
+        elif event == UNDER_OFF: character.velocity += 1
 
         if event == RIGHT_ON:
             character.velocity += MOVE_SPEED_PPS
@@ -101,7 +93,7 @@ class Attack:
         pass
 
     def do(character):
-        character.frame_att = (character.frame_att + FRAME_PER_ATTACK * ACTION_PER_TIME * Framework.frame_time) % 18
+        character.frame_att = (character.frame_att + FRAME_PER_ATTACK * ACTION_PER_TIME * Framework.frame_time) % 17
 
     def draw(character):
         if character.att_state == 0:
@@ -173,15 +165,8 @@ class Roll:
         elif character.sight == 3:
             character.x += character.velocity * Framework.frame_time
 
-        if character.x > 776:
-            character.x = 776
-        elif character.y > 468:
-            character.y = 468
-        elif character.x < 24:
-            character.x = 24
-        elif character.y < 21:
-            character.y = 21
-
+        character.x = clamp(25, character.x, 775)
+        character.y = clamp(20, character.y, 470)
         character.frame = (character.frame + FRAME_PER_ACTION * ACTION_PER_TIME * Framework.frame_time) % 8
 
     def draw(character):
@@ -196,23 +181,23 @@ class Roll:
 
 
 state_table = {
-    Move: {RIGHT_ON: Move, LEFT_ON: Move, UP_ON: Move, UNDER_ON: Move, ATT_MODE: Move, ATT_MOFF: Move, \
+    Move: {RIGHT_ON: Move, LEFT_ON: Move, UP_ON: Move, UNDER_ON: Move, \
            RIGHT_OFF: Move, LEFT_OFF: Move, UP_OFF: Move, UNDER_OFF: Move, \
            ATT_ON: Attack, ROLL_ON: Roll, DFF_ON: Dffense, ATT_OFF: Move, ROLL_OFF: Move, DFF_OFF: Move},
-    Attack: {RIGHT_ON: Attack, LEFT_ON: Attack, UP_ON: Attack, UNDER_ON: Attack, ATT_MODE: Attack, ATT_MOFF: Attack, \
-             RIGHT_OFF: Attack, LEFT_OFF: Attack, UP_OFF: Attack, UNDER_OFF: Attack, \
+    Attack: {RIGHT_ON: Attack, LEFT_ON: Attack, UP_ON: Attack, UNDER_ON: Attack, \
+             RIGHT_OFF: Move, LEFT_OFF: Move, UP_OFF: Move, UNDER_OFF: Move, \
              ATT_ON: Attack, ROLL_ON: Attack, DFF_ON: Attack, ATT_OFF: Move, ROLL_OFF: Attack, DFF_OFF: Attack},
-    Dffense: {RIGHT_ON: Dffense, LEFT_ON: Dffense, UP_ON: Dffense, UNDER_ON: Dffense, ATT_MODE: Move, ATT_MOFF: Move, \
-              RIGHT_OFF: Dffense, LEFT_OFF: Dffense, UP_OFF: Dffense, UNDER_OFF: Dffense, \
+    Dffense: {RIGHT_ON: Dffense, LEFT_ON: Dffense, UP_ON: Dffense, UNDER_ON: Dffense, \
+              RIGHT_OFF: Move, LEFT_OFF: Move, UP_OFF: Move, UNDER_OFF: Move, \
               ATT_ON: Dffense, ROLL_ON: Dffense, DFF_ON: Dffense, ATT_OFF: Dffense, ROLL_OFF: Dffense, DFF_OFF: Move},
-    Roll: {RIGHT_ON: Roll, LEFT_ON: Roll, UP_ON: Roll, UNDER_ON: Roll, ATT_MODE: Move, ATT_MOFF: Move, \
-           RIGHT_OFF: Roll, LEFT_OFF: Roll, UP_OFF: Roll, UNDER_OFF: Roll, \
+    Roll: {RIGHT_ON: Roll, LEFT_ON: Roll, UP_ON: Roll, UNDER_ON: Roll, \
+           RIGHT_OFF: Move, LEFT_OFF: Move, UP_OFF: Move, UNDER_OFF: Move, \
            ATT_ON: Roll, ROLL_ON: Roll, DFF_ON: Roll, ATT_OFF: Move, ROLL_OFF: Move, DFF_OFF: Move}
 }
 
 
 class Character:
-    state_temp = 8
+    state_temp = 18
     hp = 200
     def __init__(self):
         self.x, self.y = 650, 250
@@ -242,24 +227,32 @@ class Character:
 
     def update(self):
         self.current.do(self)
+        self.weapon_change()
 
         if self.current == Attack and Character.state_temp > 0:
             Character.state_temp -= 1
-        else:
-            Character.state_temp = 8
+            self.current.exit(self, Attack)
+            self.current.enter(self, Attack)
+            print(Character.state_temp)
+        elif self.current == Attack and Character.state_temp == 0:
+            Character.state_temp = 18
 
         if self.current == Roll and Character.state_temp > 0:
             Character.state_temp -= 1
-        else:
-            Character.state_temp = 8
+            self.current.exit(self, Roll)
+            self.current.enter(self, Roll)
+            print(Character.state_temp)
+        elif self.current == Roll and Character.state_temp == 0:
+            Character.state_temp = 18
 
-        if len(self.event_que) > 0:
-            if Character.state_temp <= 0:
-                Character.state_temp = 8
-            event = self.event_que.pop()
-            self.current.exit(self, event)
-            self.current = state_table[self.current][event]
-            self.current.enter(self, event)
+        if Character.state_temp == 18:
+            if len(self.event_que) > 0:
+                if Character.state_temp <= 0:
+                    Character.state_temp = 8
+                event = self.event_que.pop()
+                self.current.exit(self, event)
+                self.current = state_table[self.current][event]
+                self.current.enter(self, event)
 
     def draw(self):
         self.current.draw(self)
@@ -277,9 +270,15 @@ class Character:
 
     def collide_gimmick(self):
         Framework.timer += Framework.frame_time
-        if Framework.timer > 0.5:
+        if Framework.timer > 0.5 and self.current != Dffense:
             Framework.timer = 0
             Character.hp -= 10
+
+    def weapon_change(self):
+        # if SDL_KEYDOWN and SDLK_l:
+        #     print('change')
+        #     self.att_state = (self.att_state + 1) % 3
+        pass
 
     def Attack_time(self):
         if self.current == Attack:
